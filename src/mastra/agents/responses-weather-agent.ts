@@ -18,6 +18,6 @@ export const responsesWeatherAgent = new Agent({
 
       Use the weatherTool to fetch current weather data.
 `,
-  model: "mastra/openai/gpt-5-mini",
+  model: "anthropic/zhipu-glm/glm-5.3-flash",
   tools: { weatherTool },
 });

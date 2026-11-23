@@ -22,5 +22,5 @@ export const jsonRenderAgent = new Agent({
     - Every child key referenced in \`children\` must exist in \`elements\`
     - Use empty \`children: []\` for leaf elements
   `,
-  model: "mastra/openai/gpt-5-mini",
+  model: "anthropic/zhipu-glm/glm-5.3-flash",
 });

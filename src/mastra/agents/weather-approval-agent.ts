@@ -18,6 +18,6 @@ Your primary function is to help users get weather details for specific location
 When a tool execution is not approved by the user, do not retry it. Inform the user that the action was not performed.
 
 Use the weatherApprovalTool to fetch current weather data.`,
-  model: "mastra/openai/gpt-5-mini",
+  model: "anthropic/zhipu-glm/glm-5.3-flash",
   tools: { weatherApprovalTool },
 });

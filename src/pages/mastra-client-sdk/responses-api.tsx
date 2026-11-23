@@ -31,7 +31,7 @@ const suggestions = [
 ];
 
 const RESPONSES_AGENT_ID = "responsesWeatherAgent";
-const RESPONSES_MODEL = "mastra/openai/gpt-5-mini";
+const RESPONSES_MODEL = "anthropic/zhipu-glm/glm-5.3-flash";
 
 type ChatMessage = {
   id: string;

@@ -9,6 +9,6 @@ export const inventoryCheckAgent = new Agent({
     You are an inventory checker. When given a product ID and quantity, use the check-inventory tool 
     to verify if the items are in stock. The tool will show progress updates as it checks.
   `,
-  model: "mastra/openai/gpt-5-mini",
+  model: "anthropic/zhipu-glm/glm-5.3-flash",
   tools: { inventoryCheckTool },
 });

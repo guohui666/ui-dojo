@@ -29,7 +29,7 @@ export const hitlPlanningAgent = new Agent({
     - Keep steps concise but descriptive
     - Make sure steps are in logical order
   `,
-  model: "mastra/openai/gpt-5-mini",
+  model: "anthropic/zhipu-glm/glm-5.3-flash",
   tools: {
     generateTaskStepsTool,
   },

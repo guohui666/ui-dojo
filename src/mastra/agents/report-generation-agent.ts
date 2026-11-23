@@ -9,6 +9,6 @@ export const reportGenerationAgent = new Agent({
     You are a report generation assistant. When given a topic, use the generate-report tool 
     to create a comprehensive report. The tool will show progress updates as it works.
   `,
-  model: "mastra/openai/gpt-5-mini",
+  model: "anthropic/zhipu-glm/glm-5.3-flash",
   tools: { reportGenerationTool },
 });

@@ -17,6 +17,6 @@ export const weatherForecastAgent = new Agent({
 
     If the user does not specify a city, ask them to clarify the location before using the tool.
   `,
-  model: "mastra/openai/gpt-5-mini",
+  model: "anthropic/zhipu-glm/glm-5.3-flash",
   tools: { nestedAgentStreamTool: nestedWeatherAgentStreamTool },
 });

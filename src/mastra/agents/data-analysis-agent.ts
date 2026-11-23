@@ -9,6 +9,6 @@ export const dataAnalysisAgent = new Agent({
     You are a data analysis assistant. When given a dataset, use the analyze-data tool 
     to process it and provide insights. The tool will show progress updates as it works.
   `,
-  model: "mastra/openai/gpt-5-mini",
+  model: "anthropic/zhipu-glm/glm-5.3-flash",
   tools: { dataAnalysisTool },
 });

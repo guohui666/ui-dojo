@@ -16,7 +16,7 @@ export const orderProcessingAgent = new Agent({
     Always explain what you're doing at each step. The inventory check agent and workflow steps will show 
     progress updates as they work.
   `,
-  model: "mastra/openai/gpt-5-mini",
+  model: "anthropic/zhipu-glm/glm-5.3-flash",
   agents: {
     inventoryCheckAgent,
   },

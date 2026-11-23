@@ -10,6 +10,6 @@ export const taskAgent = new Agent({
     use the process-task tool to handle it. The tool will show progress updates 
     as it works on the task.
   `,
-  model: "mastra/openai/gpt-5-mini",
+  model: "anthropic/zhipu-glm/glm-5.3-flash",
   tools: { taskTool },
 });

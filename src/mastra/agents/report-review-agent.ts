@@ -10,6 +10,6 @@ export const reportReviewAgent = new Agent({
     to analyze and improve the report's quality, clarity, and structure. The tool will show progress 
     updates as it works.
   `,
-  model: "mastra/openai/gpt-5-mini",
+  model: "anthropic/zhipu-glm/glm-5.3-flash",
   tools: { reportReviewTool },
 });

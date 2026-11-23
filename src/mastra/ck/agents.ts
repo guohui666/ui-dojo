@@ -9,8 +9,8 @@ import {
   deepResearchTool,
 } from "./tools";
 
-const MASTRA_GATEWAY_MODEL = "mastra/openai/gpt-5-mini";
-const OPENAI_MODEL = "openai/gpt-5-mini";
+const MASTRA_GATEWAY_MODEL = "anthropic/zhipu-glm/glm-5.3-flash";
+const OPENAI_MODEL = "anthropic/zhipu-glm/glm-5.3-flash";
 
 /** Agentic chat — a plain weather assistant. Also demonstrates agent-context
  *  (the page sends the user's name via useAgentContext) and conversation memory. */
@@ -60,7 +60,7 @@ export const ckReasoningAgent = new Agent({
   id: "ck_reasoning",
   name: "ck_reasoning",
   instructions: `You are a careful problem solver. Work through the problem, then give a clear final answer.`,
-  model: "mastra/openai/o4-mini",
+  model: "anthropic/zhipu-glm/glm-5.3",
   defaultOptions: {
     providerOptions: {
       openai: { reasoningSummary: "detailed", reasoningEffort: "medium" },
