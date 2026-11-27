@@ -55,6 +55,13 @@ const STATUS_MAP: Record<StepStatus, ToolUIPart["state"]> = {
   suspended: "input-available",
   waiting: "input-available",
   skipped: "output-available",
+  // @mastra/core 1.68.0 added "canceled" to the public step-status union.
+  canceled: "output-error",
+};
+
+const STEP_ERROR_TEXT: Partial<Record<StepStatus, string>> = {
+  failed: "Step failed",
+  canceled: "Step canceled",
 };
 
 // Convert routing-agent to Routing Agent
@@ -106,7 +113,7 @@ const DisplayAgentStep = ({
             (task as AgentDataPart["data"])?.text ||
             (step.output as ToolUIPart["output"])
           }
-          errorText={step.status === "failed" ? "Step failed" : undefined}
+          errorText={STEP_ERROR_TEXT[step.status]}
           language="markdown"
         />
       </ToolContent>

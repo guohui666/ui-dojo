@@ -36,6 +36,15 @@ const STATUS_MAP: Record<
   success: "output-available",
   failed: "output-error",
   skipped: "output-available",
+  // @mastra/core 1.68.0 added "canceled" to the public step-status union.
+  canceled: "output-error",
+};
+
+const STEP_ERROR_TEXT: Partial<
+  Record<WorkflowData["steps"][string]["status"], string>
+> = {
+  failed: "Step failed",
+  canceled: "Step canceled",
 };
 
 const DisplayStep = ({
@@ -79,7 +88,7 @@ const DisplayStep = ({
         )}
         <ToolOutput
           output={step.output}
-          errorText={step.status === "failed" ? "Step failed" : undefined}
+          errorText={STEP_ERROR_TEXT[step.status]}
         />
       </ToolContent>
     </Tool>

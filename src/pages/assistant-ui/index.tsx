@@ -1,27 +1,33 @@
 import { Link, useNavigate, useParams, useSearchParams } from "react-router";
-import {
-  toAssistantUIMessage,
-  useChat,
-  type MastraUIMessage,
-} from "@mastra/react";
+import type { UIMessage } from "ai";
+import { useEffect } from "react";
 import { toAISdkV5Messages } from "@mastra/ai-sdk/ui";
-import { useEffect, useRef } from "react";
 import { Thread } from "@/components/assistant-ui/thread";
 import { useAgent } from "@/hooks/use-agent";
 import { useMemory } from "@/hooks/use-memory";
 import { useThreads } from "@/hooks/use-threads";
 import { useAgentMessages } from "@/hooks/use-agent-messages";
+import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import {
-  AssistantRuntimeProvider,
-  useExternalStoreRuntime,
-  type AppendMessage,
-} from "@assistant-ui/react";
+  useChatRuntime,
+  AssistantChatTransport,
+} from "@assistant-ui/react-ai-sdk";
 import { Button } from "@/components/ui/button";
 import { PlusIcon, X } from "lucide-react";
-import type { StorageThreadType } from "@mastra/core/memory";
+import type { MastraClient } from "@mastra/client-js";
 import { ThreadListSkeleton } from "@/components/assistant-ui/thread-list";
 import { useDeleteThread } from "@/hooks/use-delete-thread";
 import { newThreadLink } from "@/lib/utils";
+import { MASTRA_BASE_URL } from "@/constants";
+
+/**
+ * A memory thread as the browser receives it over HTTP (dates are ISO strings).
+ * Do not use `StorageThreadType` from `@mastra/core/memory` here. That is the
+ * server storage type, where the dates are `Date` objects.
+ */
+type MemoryThread = Awaited<
+  ReturnType<MastraClient["listMemoryThreads"]>
+>["threads"][number];
 
 const suggestions = [
   {
@@ -50,7 +56,7 @@ const threadDateFormatter = new Intl.DateTimeFormat("en-US", {
   second: "2-digit",
 });
 
-const getThreadDisplayTitle = (thread: StorageThreadType) => {
+const getThreadDisplayTitle = (thread: MemoryThread) => {
   const title = thread.title?.trim();
   if (title) {
     return title;
@@ -135,7 +141,7 @@ interface ChatProps {
   agentId: string;
   agentName?: string;
   threadId?: string;
-  initialMessages?: MastraUIMessage[];
+  initialMessages?: UIMessage[];
   memory?: boolean;
   refreshThreadList?: () => void;
 }
@@ -162,9 +168,7 @@ const Chat = ({
     <CustomRuntimeProvider
       key={threadId}
       initialMessages={
-        data?.messages
-          ? (toAISdkV5Messages(data.messages) as MastraUIMessage[])
-          : []
+        data?.messages ? toAISdkV5Messages(data.messages) : undefined
       }
       agentId={agentId}
       threadId={threadId}
@@ -186,76 +190,27 @@ const CustomRuntimeProvider = ({
   threadId,
   refreshThreadList,
 }: { children: React.ReactNode } & Omit<ChatProps, "memory" | "agentName">) => {
-  const {
-    messages,
-    sendMessage,
-    cancelRun,
-    isRunning: isRunningStream,
-    setMessages,
-  } = useChat({
-    agentId,
-    initialMessages: initialMessages || [],
-  });
-
-  const abortControllerRef = useRef<AbortController | null>(null);
-
-  const onNew = async (message: AppendMessage) => {
-    if (message.content[0]?.type !== "text")
-      throw new Error("Only text messages are supported");
-
-    const input = message.content[0].text;
-
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
-
-    try {
-      await sendMessage({
-        message: input,
-        mode: "stream",
-        threadId,
-        onChunk: async (chunk) => {
-          if (chunk.type === "finish") {
-            await refreshThreadList?.();
-          }
-        },
-        signal: controller.signal,
-      });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
+  // @mastra/react >= 0.5.0 no longer exports `useChat` with AI SDK UI messages,
+  // `toAssistantUIMessage` or `MastraUIMessage` (its `useChat` now returns
+  // MastraDBMessage[]). The chat therefore streams through `chatRoute()` (see
+  // src/mastra/index.ts) with Assistant UI's own AI SDK runtime, the same way as
+  // the client-tools and human-in-the-loop pages. The thread list, the stored
+  // history and the delete action still use the Mastra client (hooks/use-*.ts).
+  const runtime = useChatRuntime({
+    transport: new AssistantChatTransport({
+      api: `${MASTRA_BASE_URL}/chat/${agentId}`,
+      // Same default as the old `useChat`: the resource falls back to the agent id.
+      body: threadId
+        ? { memory: { resource: agentId, thread: threadId } }
+        : undefined,
+    }),
+    messages: initialMessages,
+    onFinish: () => {
+      void refreshThreadList?.();
+    },
+    onError: (error) => {
       console.error("Error occurred in CustomRuntimeProvider", error);
-
-      if (error.name === "AbortError") {
-        return;
-      }
-
-      setMessages((currentConversation) => [
-        ...currentConversation,
-        {
-          role: "assistant",
-          parts: [{ type: "text", text: `${error}` }],
-        } as MastraUIMessage,
-      ]);
-    } finally {
-      abortControllerRef.current = null;
-    }
-  };
-
-  const onCancel = async () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-      abortControllerRef.current = null;
-      cancelRun?.();
-    }
-  };
-
-  const messagesForRuntime = messages.map(toAssistantUIMessage);
-
-  const runtime = useExternalStoreRuntime({
-    isRunning: isRunningStream,
-    messages: messagesForRuntime,
-    convertMessage: (x) => x,
-    onNew,
-    onCancel,
+    },
   });
 
   return (
@@ -266,7 +221,7 @@ const CustomRuntimeProvider = ({
 };
 
 interface SidebarProps {
-  threads: StorageThreadType[];
+  threads: MemoryThread[];
   agentId: string;
   isLoading: boolean;
   threadId: string;
